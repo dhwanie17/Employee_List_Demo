@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-
+import { nanoid } from 'nanoid';
 function Form(props) {
   const initialValues = {
-    name: '',
-    email: '',
-    username: '',
-    id: '',
-    date: '',
-    department: '',
-    designation: '',
+    name: props.selectedUser?.name || '',
+    email: props.selectedUser?.email || '',
+    username: props.selectedUser?.username || '',
+    phone: props.selectedUser?.phone || '',
+    id: props.selectedUser?.id || '',
+    date: props.selectedUser?.date || '',
+    department: props.selectedUser?.department || '',
+    designation: props.selectedUser?.designation || '',
+    company: props.selectedUser?.company || '',
+    lastname: props.selectedUser?.lastname || '',
   };
   const [formValues, setFormValues] = useState(initialValues);
   const [formErrors, setFormErrors] = useState({});
@@ -25,6 +28,9 @@ function Form(props) {
       console.log(formValues);
     }
   }, [formErrors]);
+
+  useEffect(() => {}, [props.selectedUser]);
+
   const validate = (values) => {
     const errors = {};
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
@@ -55,45 +61,64 @@ function Form(props) {
     }
     if (!values.department) {
       errors.department = 'Please select your Department!';
-    } else if (values.department == '--Select Department--') {
+    } else if (values.department === '--Select Department--') {
       errors.department = 'Please select your Department!';
     }
     if (!values.designation) {
       errors.designation = 'Please select your Designation!';
-    } else if (values.designation == '--Select Designation--') {
+    } else if (values.designation === '--Select Designation--') {
       errors.designation = 'Please select your Designation!';
     }
-
-    // if (!values.password) {
-    //   errors.password = 'Password is required';
-    // } else if (values.password.length < 4) {
-    //   errors.password = 'Password must be more than 4 characters';
-    // } else if (values.password.length > 10) {
-    //   errors.password = 'Password cannot exceed more than 10 characters';
-    // }
     return errors;
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    // e.preventDefault();
+
     setFormErrors(validate(formValues));
     setIsSubmit(true);
-    // alert('ifg');
+
+    let array = new Array();
+    var str = localStorage.getItem('employee');
+    if (str != null) array = JSON.parse(str);
+    if (validate) {
+      const obj = {
+        nid: nanoid(),
+        name: formValues.name,
+        email: formValues.email,
+        username: formValues.username,
+        phone: formValues.phone,
+        id: formValues.id,
+        date: formValues.date,
+        company: formValues.company,
+        lastname: formValues.lastname,
+        department: formValues.department,
+        designation: formValues.designation,
+      };
+      array.push(obj);
+      localStorage.setItem('employee', JSON.stringify(array));
+      // alert('ifg');
+      console.log(formValues);
+      let employee = JSON.parse(localStorage.getItem('employee')) || [];
+      employee.splice(6, 1);
+      console.log('jyffhfh', employee);
+    }
   };
+
   return (
     <>
       <div className="container">
         <form id="form" onSubmit={handleSubmit}>
           <div className="grid">
             <span className="center">Add Employee</span>
-            <span class=" closed right" onClick={props.handleClose}>
+            <span className=" closed right" onClick={props.handleClose}>
               &times;
             </span>
             <span></span>
           </div>
           <div className="form">
             <div>
-              <label for="fname" class="form-label required">
+              <label for="fname" className="form-label required">
                 First name:
               </label>
               <input
@@ -106,7 +131,6 @@ function Form(props) {
                 aria-describedby="emailHelp"
               />
               <p>{formErrors.name}</p>
-              {/* {userErr ? <span>User Not Valid</span> : ''} */}
             </div>
             <div>
               <label for="exampleInputEmail1" class="form-label">
@@ -114,6 +138,9 @@ function Form(props) {
               </label>
               <input
                 type="text"
+                name="lastname"
+                value={formValues.lastname}
+                onChange={handleChange}
                 class="form-control"
                 aria-describedby="emailHelp"
               />
@@ -182,6 +209,9 @@ function Form(props) {
               <input
                 pattern="[0-9]{10}"
                 type="text"
+                name="phone"
+                value={formValues.phone}
+                onChange={handleChange}
                 class="form-control"
                 aria-describedby="emailHelp"
               />
@@ -191,7 +221,13 @@ function Form(props) {
               <label for="exampleInputEmail1" class="form-label">
                 Company:
               </label>
-              <select class="form-control" id="company">
+              <select
+                class="form-control"
+                id="company"
+                name="company"
+                value={formValues.company}
+                onChange={handleChange}
+              >
                 <option value="--Select Company--">--Select Company--</option>
 
                 <option value="Global Technologies">Global Technologies</option>
@@ -254,7 +290,7 @@ function Form(props) {
             </button>
             <div>
               {Object.keys(formErrors).length === 0 && isSubmit ? (
-                <div className="ui message success">Signed in successfully</div>
+                <div className="ui message success">Employee Added</div>
               ) : (
                 ''
               )}
